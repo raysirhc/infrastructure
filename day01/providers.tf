@@ -21,8 +21,9 @@ provider "docker" {
 }
 
 provider "digitalocean" {
-   token = var.DO_TOKEN
- }
+  token = var.DO_TOKEN
+}
 
 provider "local" {
+  ## await mmore info here
 }

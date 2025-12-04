@@ -1,0 +1,25 @@
+---
+- name: Simple host operations
+  hosts: all
+  become: yes
+  
+  tasks:
+    - name: Ping all hosts
+      ping:
+    
+    - name: Echo ansible user
+      debug:
+        msg: "Ansible user is: {{ ansible_user }}"
+    
+    - name: Create /opt/tmp directory
+      file:
+        path: /opt/tmp
+        state: directory
+        mode: '1755'
+    
+    - name: install unzip
+      apt:
+        name: unzip
+        state: present
+
+      

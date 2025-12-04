@@ -1,0 +1,22 @@
+---
+- name: Simple host operations
+  hosts: all
+  become: yes
+  
+  tasks:
+    - name: Ping all hosts
+      ping:
+
+
+    - name: check apt connectivity
+      apt:
+        update_cache: yes
+
+    - name: install package
+      apt: 
+        name: "{{ item }}"
+        state: present
+      loop:
+      - nginx
+      - unzip
+      - tmux

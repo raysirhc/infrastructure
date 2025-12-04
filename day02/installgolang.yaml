@@ -1,0 +1,27 @@
+---
+- name: Simple host operations
+  hosts: all
+  become: yes
+  
+  tasks:
+    - name: Ping all hosts
+      ping:
+    
+    - name: create directory
+      file:
+        path: /usr/local/share/lang
+        state: directory
+        mode: '1777'
+
+    - name: install go lang
+      unarchive:
+        src: https://go.dev/dl/go1.25.5.linux-amd64.tar.gz
+        dest: /usr/local/share/lang
+        remote_src: yes
+        validate_certs: no
+
+    - name: ln share
+      file:
+        src: /usr/local/share/lang/go/bin/go
+        dest: /usr/local/bin/go
+        state: link
