@@ -1,0 +1,56 @@
+- name: Configure Nginx
+  hosts: all
+  become: yes
+  
+  tasks:
+    - name: Install required packages
+      apt:
+        name:
+          - nginx
+        state: present
+
+    - name: Get droplet IP address
+      set_fact:
+        droplet_ip: "{{ ansible_default_ipv4.address }}"
+
+    - name: Create nginx configuration for code-server
+      template:
+        src: /home/fred/infrastructure/workshop02/code-server.conf
+        dest: /etc/nginx/sites-available/code-server.conf
+        mode: '0644'
+
+    - name: Remove default nginx site
+      file:
+        path: /etc/nginx/sites-enabled/default
+        state: absent
+
+    - name: Enable code-server nginx site
+      file:
+        src: /etc/nginx/sites-available/code-server.conf
+        dest: /etc/nginx/sites-enabled/code-server.conf
+        state: link
+
+    - name: Reload systemd daemon
+      systemd:
+        daemon_reload: yes
+
+    - name: Enable and start code-server service
+      systemd:
+        name: code-server
+        enabled: yes
+        state: restarted
+        daemon_reload: yes
+
+    - name: Restart nginx service
+      systemd:
+        name: nginx
+        enabled: yes
+        state: restarted
+        daemon_reload: yes
+
+    - name: Display access information
+      debug:
+        msg:
+          - "Access URL: http://{{ droplet_ip }}"
+          - "Domain URL: http://code-{{ droplet_ip }}.nip.io"
+          - "Password: {{ code_server_password }}"
