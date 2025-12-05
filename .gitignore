@@ -46,3 +46,5 @@ id_ecdsa*
 # planout
 
 inventory.yaml
+terraform.tfstate
+variables.pkr.hcl
