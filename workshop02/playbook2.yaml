@@ -3,12 +3,6 @@
   become: yes
   
   tasks:
-    - name: Install required packages
-      apt:
-        name:
-          - nginx
-        state: present
-
     - name: Get droplet IP address
       set_fact:
         droplet_ip: "{{ ansible_default_ipv4.address }}"

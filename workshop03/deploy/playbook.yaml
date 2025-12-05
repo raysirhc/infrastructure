@@ -1,0 +1,64 @@
+- name: Configure Code-Server
+  hosts: all
+  become: true
+  
+  vars_prompt:
+    - name: code_server_version
+      prompt: "Enter code-server version (e.g., 4.106.3)"
+      private: false
+      default: "4.106.3"
+    
+    - name: code_server_password
+      prompt: "Enter password for code-server"
+      private: true
+      confirm: true
+  
+  tasks:
+
+    - name: Download and install code-server
+      shell: |
+        curl -fsSL https://code-server.dev/install.sh | sh
+      args:
+        creates: /usr/bin/code-server
+      environment:
+        VERSION: "{{ code_server_version }}"
+    
+    - name: Replace password placeholder in code-server.service
+      replace:
+        path: /lib/systemd/system/code-server.service
+        regexp: '__PLACEHOLDER__'
+        replace: "{{ code_server_password }}"
+  
+    - name: Get droplet IP address
+      set_fact:
+        droplet_ip: "{{ ansible_default_ipv4.address }}"
+
+    - name: Replace IP placeholder in code-server.conf
+      replace:
+        path: /etc/nginx/sites-available/code-server.conf
+        regexp: '__droplet_ip__'
+        replace: "{{ droplet_ip }}"
+
+    - name: Reload systemd daemon
+      systemd:
+        daemon_reload: yes
+
+    - name: Enable and start code-server service
+      systemd:
+        name: code-server
+        enabled: yes
+        state: restarted
+
+    - name: Restart nginx service
+      systemd:
+        name: nginx
+        enabled: yes
+        state: restarted
+
+    - name: Display access information
+      debug:
+        msg:
+          - "Access URL: http://{{ droplet_ip }}"
+          - "Domain URL: http://code-{{ droplet_ip }}.nip.io"
+          - "Password: {{ code_server_password }}"
+          - "Code-server version: {{ code_server_version }}"

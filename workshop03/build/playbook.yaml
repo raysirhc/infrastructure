@@ -1,0 +1,37 @@
+- name: Install and Configure Code-Server
+  hosts: all
+  become: true
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+
+    - name: Install required packages
+      apt:
+        name:
+          - curl
+          - nginx
+        state: present
+
+    - name: Create code-server systemd service file
+      template:
+        src: /home/fred/infrastructure/workshop03/build/code-server.service
+        dest: /lib/systemd/system/code-server.service
+        mode: '0644'
+
+    - name: Create nginx configuration for code-server
+      template:
+        src: /home/fred/infrastructure/workshop03/build/code-server.conf
+        dest: /etc/nginx/sites-available/code-server.conf
+        mode: '0644'
+
+    - name: Remove default nginx site
+      file:
+        path: /etc/nginx/sites-enabled/default
+        state: absent
+
+    - name: Enable code-server nginx site
+      file:
+        src: /etc/nginx/sites-available/code-server.conf
+        dest: /etc/nginx/sites-enabled/code-server.conf
+        state: link
